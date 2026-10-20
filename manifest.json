@@ -1,0 +1,8 @@
+{
+  "name": "DUTY PURSER OJT CHECK LIST",
+  "short_name": "DP OJT",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F6F7F9",
+  "theme_color": "#0F2A43"
+}

@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0F2A43">
+<link rel="manifest" href="manifest.json">
+<title>DUTY PURSER OJT CHECK LIST</title>
+<style>
+  :root{
+    --navy: #0F2A43;
+    --navy-2: #163A5C;
+    --sky: #2E7FBF;
+    --sky-light: #E7F1FA;
+    --paper: #F6F7F9;
+    --line: #DDE3EA;
+    --ink: #16202B;
+    --muted: #6B7A88;
+    --good: #2E9E5B;
+    --warn: #D97706;
+    --bad: #C0392B;
+    --radius: 14px;
+  }
+  *{ box-sizing: border-box; }
+  html, body{ margin:0; padding:0; background: var(--paper);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; }
+  #app-root{
+    max-width: 560px;
+    margin: 0 auto;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    padding-bottom: 96px;
+  }
+  .topbar{
+    position: sticky; top:0; z-index: 30;
+    background: linear-gradient(135deg, var(--navy), var(--navy-2));
+    color: #fff;
+    padding: 16px 18px 14px;
+  }
+  .topbar .eyebrow{
+    font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+    color: #9FC3E6; font-weight: 700; margin-bottom: 4px;
+  }
+  .topbar h1{ font-size: 19px; margin: 0 0 10px; font-weight: 800; letter-spacing: -0.01em;}
+  .progress-row{ display:flex; align-items:center; gap:10px; }
+  .progress-track{
+    flex:1; height:8px; background: rgba(255,255,255,.18); border-radius:99px; overflow:hidden;
+  }
+  .progress-fill{ height:100%; background: linear-gradient(90deg,#5BA8E0,#8FD3B5); width:0%; transition: width .25s ease; }
+  .progress-label{ font-size: 12px; color:#CFE3F5; font-weight:700; white-space:nowrap;}
+
+  .tabs{ display:flex; gap:6px; padding: 10px 14px 0; }
+  .tab{
+    flex:1; text-align:center; padding:9px 6px; border-radius: 10px 10px 0 0;
+    font-size:13px; font-weight:700; color: var(--muted); background: transparent; border:none; cursor:pointer;
+  }
+  .tab.active{ background: var(--paper); color: var(--navy); }
+
+  .section{ padding: 14px 14px 4px; }
+  .card{
+    background:#fff; border:1px solid var(--line); border-radius: var(--radius);
+    padding: 14px; margin-bottom: 12px;
+  }
+  .card h2{ font-size:14px; margin:0 0 10px; color: var(--navy); font-weight:800; }
+
+  .field{ margin-bottom: 10px; }
+  .field label{ display:block; font-size:12px; color: var(--muted); font-weight:700; margin-bottom:4px; }
+  .field input, .field textarea, .field select{
+    width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:10px;
+    font-size:15px; background: var(--paper); color: var(--ink); font-family: inherit;
+  }
+  .field select{ appearance: none; -webkit-appearance:none; background-repeat:no-repeat; background-position: right 10px center; background-size: 18px; padding-right: 32px; }
+  .field select:disabled{ opacity:.55; cursor:not-allowed; }
+  .field input:focus, .field textarea:focus, .field select:focus{ outline: 2px solid var(--sky); background-color:#fff; }
+  .field input[type="date"]{ min-height: 42px; text-align:left; -webkit-appearance:none; appearance:none; padding:10px 12px; }
+  #comments{
+    width:100%; box-sizing:border-box; min-height: 160px; resize: vertical; line-height: 1.5;
+    padding:10px 12px; border:1px solid var(--line); border-radius:10px;
+    font-size:15px; background: var(--paper); color: var(--ink); font-family: inherit;
+  }
+  #comments:focus{ outline: 2px solid var(--sky); background-color:#fff; }
+  .field-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+
+  .field-error{ border-color: var(--bad) !important; background:#FFF4F3 !important; }
+  select.field-error{ background-color:#FFF4F3 !important; }
+  .prefix-input{
+    display:flex; align-items:stretch; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:var(--paper);
+  }
+  .prefix-input.field-error{ border-color: var(--bad) !important; background:#FFF4F3 !important; }
+  .prefix-tag{
+    flex-shrink:0; display:flex; align-items:center; padding:0 10px; font-size:15px; font-weight:800;
+    color: var(--navy); background:#E9EEF3; border-right:1px solid var(--line);
+  }
+  .prefix-input input{
+    flex:1; min-width:0; border:none; background:transparent; padding:10px 12px; font-size:15px; color:var(--ink); font-family:inherit;
+  }
+  .prefix-input input:focus{ outline:none; background:#fff; }
+
+  .date-btn{
+    width:100%; text-align:left; padding:10px 12px; border:1px solid var(--line); border-radius:10px;
+    font-size:15px; background: var(--paper); color: var(--ink); font-family: inherit; cursor:pointer;
+  }
+  .cal-popup{
+    margin-top:8px; background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px;
+    box-shadow: 0 6px 20px rgba(15,42,67,.1);
+  }
+  .cal-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .cal-nav{ border:none; background:var(--paper); width:30px; height:30px; border-radius:8px; font-size:16px; font-weight:800; color:var(--navy); cursor:pointer; }
+  .cal-title{ font-size:13.5px; font-weight:800; color:var(--navy); }
+  .cal-weekdays{ display:grid; grid-template-columns: repeat(7,1fr); text-align:center; font-size:11px; color:var(--muted); font-weight:700; margin-bottom:4px; }
+  .cal-grid{ display:grid; grid-template-columns: repeat(7,1fr); grid-auto-rows: 38px; gap:2px; }
+  .cal-cell{
+    width:100%; height:38px; display:flex; align-items:center; justify-content:center; font-size:13px;
+    border:none; background:transparent; border-radius:8px; color:var(--ink); cursor:pointer; box-sizing:border-box;
+  }
+  .cal-cell.empty{ cursor:default; }
+  .cal-cell.disabled{ color:#C9D1D9; cursor:default; }
+  .cal-cell.today{ border:1px solid var(--sky); font-weight:800; }
+  .cal-cell.selected{ background: var(--navy); color:#fff; font-weight:800; }
+  .cal-footer{ margin-top:8px; font-size:11px; color:var(--muted); text-align:center; }
+
+  .group-title{
+    font-size: 12px; font-weight: 800; color: var(--sky); text-transform:uppercase; letter-spacing:.06em;
+    margin: 18px 4px 8px;
+  }
+
+  .item{
+    background:#fff; border:1px solid var(--line); border-radius: var(--radius);
+    padding: 13px 14px; margin-bottom: 10px;
+  }
+  .item.rated{ border-color: #BFE0CC; background: #FBFEFC; }
+  .item.item-error{ border-color: var(--bad); background: #FFF4F3; }
+  .item.item-error .item-no{ background: var(--bad); color:#fff; }
+  .item-head{ display:flex; gap:10px; margin-bottom: 10px; }
+  .item-no{
+    flex-shrink:0; width:26px; height:26px; border-radius:8px; background: var(--sky-light); color: var(--navy);
+    font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center;
+  }
+  .item-text{ font-size: 13.5px; line-height:1.45; color: var(--ink); }
+  .rate-row{ display:flex; gap:6px; }
+  .rate-btn{
+    flex:1; padding: 10px 0; border-radius:10px; border:1px solid var(--line); background: var(--paper);
+    font-size:14px; font-weight:800; color: var(--muted); cursor:pointer;
+  }
+  .rate-btn[data-v="5"].on{ background:#2E9E5B; border-color:#2E9E5B; color:#fff; }
+  .rate-btn[data-v="4"].on{ background:#5CB37A; border-color:#5CB37A; color:#fff; }
+  .rate-btn[data-v="3"].on{ background:#D9A441; border-color:#D9A441; color:#fff; }
+  .rate-btn[data-v="2"].on{ background:#D9773F; border-color:#D9773F; color:#fff; }
+  .rate-btn[data-v="1"].on{ background:#C0392B; border-color:#C0392B; color:#fff; }
+
+  .choice-hint{ display:block; font-size:11px; color:var(--muted); font-weight:700; margin: 2px 0 6px; }
+  .choice-list{ display:flex; flex-direction:column; gap:6px; margin-bottom: 4px; }
+  .choice-opt{
+    display:flex; align-items:flex-start; gap:8px; text-align:left; width:100%;
+    padding:9px 10px; border-radius:10px; border:1px solid var(--line); background: var(--paper);
+    font-size:13px; line-height:1.4; color: var(--ink); cursor:pointer;
+  }
+  .choice-opt.on{ border-color: var(--sky); background: var(--sky-light); font-weight:700; }
+  .choice-dot{ flex-shrink:0; color: var(--sky); font-size:13px; line-height:1.4; }
+
+  .draft-banner{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:#FFF7E6; border:1px solid #F1D9A3; border-radius: var(--radius); padding:12px 14px;
+  }
+  .draft-text{ font-size:12.5px; color:#7A5B12; line-height:1.4; }
+  .draft-actions{ display:flex; gap:6px; flex-shrink:0; }
+  .btn-ghost.small, .btn-primary.small{ padding:8px 10px; font-size:12px; flex:none; white-space:nowrap; border-radius:10px; border:1px solid var(--line); background:#fff; font-weight:700; cursor:pointer; }
+  .btn-primary.small{ background:var(--navy); color:#fff; border:none; }
+
+  .bottombar{
+    position: fixed; bottom:0; left:50%; transform:translateX(-50%);
+    width:100%; max-width: 560px; background:#fff; border-top:1px solid var(--line);
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    display:flex; align-items:center; gap:12px; z-index: 40;
+    box-shadow: 0 -6px 18px rgba(15,42,67,.08);
+  }
+  .bottombar .total{ font-size:12px; color:var(--muted); font-weight:700; }
+  .bottombar .total b{ font-size:20px; color: var(--navy); display:block; line-height:1; }
+  .submit-btn{
+    flex:1; background: var(--navy); color:#fff; border:none; border-radius: 12px;
+    padding: 14px; font-size:15px; font-weight:800; cursor:pointer;
+  }
+  .submit-btn:disabled{ opacity:.5; }
+
+  .history-item{
+    background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:10px;
+  }
+  .history-item .row1{ display:flex; justify-content:space-between; font-size:13px; font-weight:800; color:var(--navy); }
+  .history-item .row2{ font-size:12px; color:var(--muted); margin-top:3px; }
+  .badge{ display:inline-block; padding:2px 8px; border-radius:99px; font-size:11px; font-weight:800; }
+  .badge.synced{ background:#E4F5EA; color:var(--good); }
+  .badge.pending{ background:#FCEEDC; color:var(--warn); }
+  .copy-row-btn{
+    flex:1; padding:8px; border-radius:8px; border:1px solid var(--line);
+    background:var(--paper); color:var(--navy); font-size:12px; font-weight:800; cursor:pointer;
+  }
+  .retry-btn{
+    flex:1; padding:8px; border-radius:8px; border:1px dashed var(--line);
+    background:#fff; font-size:12px; font-weight:800; cursor:pointer;
+  }
+  .draft-save-btn{
+    flex:none; background:#fff; color:var(--navy); border:1.5px solid var(--navy); border-radius: 12px;
+    padding: 14px 16px; font-size:14px; font-weight:800; cursor:pointer; white-space:nowrap;
+  }
+
+  .empty{ text-align:center; padding: 40px 20px; color:var(--muted); font-size:13px; }
+  .link-note{ font-size:11.5px; color:var(--muted); line-height:1.5; padding: 0 4px; }
+  .toast{
+    position: fixed; top: 14px; left:50%; transform:translateX(-50%); z-index:60;
+    background: var(--navy); color:#fff; padding:10px 18px; border-radius:99px; font-size:13px; font-weight:700;
+    box-shadow: 0 6px 20px rgba(0,0,0,.25); max-width: 90vw; text-align:center;
+  }
+  .sub-title{ font-size:14px; font-weight:800; color:var(--navy); background:var(--sky-light); border-radius:10px; padding:8px 12px; margin: 14px 0 8px; }
+  .sub-label{ font-size:12px; font-weight:800; color:var(--sky); margin: 4px 4px 6px; }
+  .yn-row{ display:flex; gap:6px; }
+  .yn-btn{ flex:1; padding:10px 0; border-radius:10px; border:1px solid var(--line); background:var(--paper); font-size:14px; font-weight:800; color:var(--muted); cursor:pointer; }
+  .yn-btn[data-v="Y"].on{ background:#2E9E5B; border-color:#2E9E5B; color:#fff; }
+  .yn-btn[data-v="N"].on{ background:#C0392B; border-color:#C0392B; color:#fff; }
+  .yn-btn[data-v="NA"].on{ background:#7B8794; border-color:#7B8794; color:#fff; }
+  .item-chip{ display:inline-block; font-size:10.5px; font-weight:800; color:var(--sky); background:var(--sky-light); padding:1px 7px; border-radius:99px; margin-bottom:5px; }
+  .lc-row{ display:flex; gap:8px; }
+  .lc-btn{ flex:1; padding:12px 6px; border-radius:10px; border:1px solid var(--line); background:var(--paper); font-size:13px; font-weight:800; color:var(--muted); cursor:pointer; }
+  .lc-btn[data-v="Recommended"].on{ background:#2E9E5B; border-color:#2E9E5B; color:#fff; }
+  .lc-btn[data-v="Not Recommended"].on{ background:#C0392B; border-color:#C0392B; color:#fff; }
+  .lc-row.lc-error{ outline:2px solid var(--bad); outline-offset:3px; border-radius:10px; }
+  .card.card-error{ border-color: var(--bad); background:#FFF4F3; }
+</style>
+</head>
+<body>
+<div id="app-root"></div>
+<script>
+(function(){
+  const SECTIONS = [
+    {t:"1. Pre-Flight Check", subs:[
+      {t:"1.1 비행준비", items:[
+        "객실승무원의 역량과 특성을 고려하여 듀티를 배정하는가",
+        "Check-In & 음주 측정",
+        "비행서류 소지",
+        "전 승무원 Check-In 및 음주측정 완료 확인(문자 확인)",
+        "사전 주문 기내식 및 Special Pax Check"]},
+      {t:"1.2 브리핑", items:[
+        "최신 지시 공지를 반영한 표준화된 브리핑 실시 (객실브리핑 PPT 자료 기반)",
+        "합동브리핑 (운항승무원과 원활한 양방향 Communication 유지)",
+        "이동 중 승무원 안전관리 및 인솔"]},
+      {t:"1.3 Pre-FLT C'K", items:[
+        "점검 및 결과 보고 지시",
+        "CML 확인 및 장비/설비/시스템 점검(EMG EQP/FAP etc.)",
+        "항공기 보안관련 절차 수행 (보안 및 수색점검표 작성, TASER 검사총 실시 등)",
+        "PIC에게 보안 및 수색점검표 및 CML 전달, 서명 확인",
+        "사전주문기내식 및 crew meal 상태, 수량 확인 후 catering 서류 서명",
+        "PIC에게 탑승준비상태 보고, boarding 발부 시간 확인 및 발부",
+        "Boarding 시간 공유 및 준비 지시 후, Boarding Music 재생",
+        "기타 (Fabric perfume 분사, 매 달 15일 LAV 방향제 교체 및 Demo kit 소독, Cleaning Check)"]},
+      {t:"1.4 승객 탑승", items:[
+        "탑승 중 지속적인 기내 모니터링",
+        "80% 탑승 Welcome PA 재생 및 기타 육성 방송 실시 여부 확인",
+        "탑재서류수령 및 최종 탑승객 수 일치여부 확인",
+        "조종실 출입절차 준수 및 모니터링",
+        "비상구열 브리핑 완료 확인"]},
+      {t:"1.5 Door Close", items:[
+        "Door Close 준비 상태 확인 및 PIC에게 Door Close 준비완료 보고",
+        "Door Close 방송 실시 및 Boarding Music 종료",
+        "Door Close 및 Door Mode 변경 지시, PA를 통한 Door mode 변경확인",
+        "FAP Door/Slide page 확인"]}]},
+    {t:"2. Pushback & Taxi", subs:[
+      {t:"2.1 Pushback", items:["PIC에게 Pushback 준비완료 보고"]},
+      {t:"2.2 Taxi", items:["승객안전브리핑 준비 확인 후 PRAM 재생"]}]},
+    {t:"3. Take Off", subs:[
+      {t:"3.1 이륙 전", items:[
+        "객실 안전 상태 최종 점검 (Cabin, GLY, LAV, 휴대용 전자기기 안전한 사용, 짐 보관상태 등)",
+        "객실 조명 조절",
+        "Cabin Ready (이륙 준비 완료 확인)",
+        "이륙 방송 실시",
+        "객실 모니터링 및 30 Second Review 실시"]}]},
+    {t:"4. In-Flight", subs:[
+      {t:"4.1 객실 설비 및 시스템운용", items:[
+        "객실설비 사용 및 시스템 조작(조명 조절, FAP, 인터폰, PA 시스템 등)",
+        "결함 발견 시 CML 기록 및 PIC에게 보고"]},
+      {t:"4.2 Turbulence", items:["Turbulence 단계 별 절차 준수","승객 통제 및 모니터링"]},
+      {t:"4.3 상시관리", items:[
+        "기내서비스 실시 및 총괄지휘",
+        "SVC Cart 및 기내 물품의 안전한 사용 확인",
+        "상황 별 SVC 운영 및 절차 준수",
+        "객실 환경 관리 (조명, 온도, 소음, 냄새 등)",
+        "승객응대 관련 최종 관리",
+        "객실승무원 용의복장 및 업무 수행 관리",
+        "운항승무원과의 Communication (SVC 종료 보고 등)",
+        "주기적인 객실순회를 통한 객실 및 GLY, LAV 모니터링",
+        "서비스 중 GLY, 객실 등 안전한 업무 환경 관리(ex. 식음료 제조 시 무분별한 서비스 용품 나열 등)"]}]},
+    {t:"5. Descent & Landing", subs:[
+      {t:"5.1 착륙준비 및 착륙", items:[
+        "서비스 마감 업무 관리 (판매현황 확인, 서명 등), 시점 별 방송 실시 확인",
+        "기물 및 기용품 정위치 보관 최종 확인",
+        "객실 순회를 통한 착륙 전 비행 단계별 객실 안전 상태 최종 확인",
+        "객실 조명 조절 및 Landing Music 재생",
+        "Cabin Ready (착륙 준비 완료 확인)",
+        "Landing Gear down 방송 실시",
+        "객실 모니터링 및 30 Second Review 실시"]}]},
+    {t:"6. Arrival", subs:[
+      {t:"6.1 On-Stand", items:[
+        "객실 조명 조절",
+        "Door Mode 변경 지시 이행 및 PA를 통한 Door Mode 변경 확인",
+        "FAP 내 Door/Slide page 확인"]},
+      {t:"6.2 Door Open", items:[
+        "Bridge 또는 Step Car 확인 후 하기 방송 재생 및 승객하기 실시",
+        "Door Open 절차 준수",
+        "Door Open 후, 서류 전달 및 특이사항 공유, Bridge/Step Car 접현 상태 확인"]},
+      {t:"6.3 승객하기", items:[
+        "하기 인사",
+        "최종 승객 하기 후 운송직원 및 운항 승무원에 하기 완료 보고"]}]},
+    {t:"7. Post-Flight", subs:[
+      {t:"7.1 안전/보안 점검", items:["보안점검 및 유실물 수색 지시","정비사에게 CML 기록사항 공유","비인가자 통제"]},
+      {t:"7.2 De-Briefing", items:["필요 시, 디브리핑 실시"]},
+      {t:"7.3 Irregular", items:["비정상 상황 발생 시, 적절한 대처(Cabin Report 작성 등)"]}]},
+    {t:"8. Safety Knowledge", subs:[
+      {t:"8.1 Q&A", items:["A330 Aircraft knowledge 관련 질의 응답"]}]},
+  ];
+  const ITEMS = [];
+  SECTIONS.forEach(function(sec){
+    sec.subs.forEach(function(sub){
+      const subNo = sub.t.split(" ")[0];
+      sub.list = [];
+      sub.items.forEach(function(it, i){
+        const o = typeof it === "string" ? {x:it} : it;
+        const item = {key:String(ITEMS.length+1), code: subNo + "-" + (i+1), text:o.x, chip:o.c||""};
+        ITEMS.push(item); sub.list.push(item);
+      });
+    });
+  });
+
+  // ▼▼▼ 여기에 본인의 Apps Script 웹 앱 URL을 붙여넣으세요 ▼▼▼
+  const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbw7WSoQ4tmkl1gU3Fh0bBjrRrOLsNEsq_EMvGzIyRm2Z3xQi7E8vCCJXQMY_JkkyluB/exec";
+  // ▲▲▲ 예: https://script.google.com/macros/s/AKfycb.../exec ▲▲▲
+
+  const LS_HISTORY = "ojt_history_v3";
+  const LS_DRAFTS = "ojt_drafts_v3";
+  const BLANK_HEADER = { date:"", flightNo:"", sector:"", traineeName:"", traineeEmp:"", evaluatorName:"", evaluatorEmp:"" };
+  const PREFIX_FIELDS = { flightNo: "WE" };
+  const VAL_LABEL = { Y:"Y", N:"N", NA:"N/A" };
+  const pad = n => String(n).padStart(2,"0");
+  function toDateStr(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+  function todayStr(){ return toDateStr(new Date()); }
+  function dateOffsetStr(o){ const d = new Date(); d.setDate(d.getDate()+o); return toDateStr(d); }
+  function freshHeader(){ return { ...BLANK_HEADER, date: todayStr() }; }
+  function fmtDisplayDate(s){ if(!s) return ""; const [y,m,d]=s.split("-"); return `${y}.${m}.${d}`; }
+  function fmtDate(d){ return `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+  function escapeHtml(s){ return (s+"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function genId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+  let state = {
+    tab:"form", header:freshHeader(), answers:{}, lineCheck:"", comments:"", toast:null,
+    history:[], drafts:[], currentDraftId:null, submitting:false,
+    fieldErrors:new Set(), itemErrors:new Set(), lcError:false,
+    datePickerOpen:false, calendarMonth:new Date(),
+  };
+  let draftSaveTimer = null;
+
+  function getDigits(key){
+    const v = state.header[key] || ""; const p = PREFIX_FIELDS[key];
+    return p && v.startsWith(p) ? v.slice(p.length) : v;
+  }
+  function isFieldFilled(key){
+    if(PREFIX_FIELDS[key]) return getDigits(key).length > 0;
+    return !!(state.header[key] || "").trim();
+  }
+  function answeredCount(){ return ITEMS.filter(i=>state.answers[i.key]).length; }
+
+  function loadLocal(){
+    try{ state.history = JSON.parse(localStorage.getItem(LS_HISTORY) || "[]"); }catch(e){ state.history = []; }
+    try{ state.drafts = JSON.parse(localStorage.getItem(LS_DRAFTS) || "[]"); }catch(e){ state.drafts = []; }
+    pruneOldHistory(); sortHistory();
+  }
+  function sortHistory(){ state.history.sort((a,b)=>(b.ts||0)-(a.ts||0)); }
+  function pruneOldHistory(){
+    const cutoff = Date.now() - 30*24*60*60*1000;
+    const before = state.history.length;
+    state.history = state.history.filter(h=>(h.ts||0) >= cutoff);
+    if(state.history.length !== before) saveHistory();
+  }
+  function saveHistory(){ try{ localStorage.setItem(LS_HISTORY, JSON.stringify(state.history)); }catch(e){} }
+  function saveDrafts(){ try{ localStorage.setItem(LS_DRAFTS, JSON.stringify(state.drafts)); }catch(e){} }
+  function hasFormContent(){
+    const h = state.header;
+    return Object.keys(h).some(k => k !== "date" && h[k]) || answeredCount() > 0 || !!state.lineCheck || !!state.comments;
+  }
+  function resetForm(){
+    state.header = freshHeader(); state.answers = {}; state.lineCheck = ""; state.comments = "";
+    state.currentDraftId = null; state.fieldErrors.clear(); state.itemErrors.clear(); state.lcError = false;
+  }
+  function upsertCurrentDraft(){
+    if(!hasFormContent()) return;
+    if(!state.currentDraftId) state.currentDraftId = genId();
+    const snap = { id:state.currentDraftId, header:state.header, answers:state.answers, lineCheck:state.lineCheck, comments:state.comments, savedAt:Date.now() };
+    const idx = state.drafts.findIndex(d=>d.id===state.currentDraftId);
+    if(idx >= 0) state.drafts[idx] = snap; else state.drafts.unshift(snap);
+    saveDrafts();
+  }
+  function scheduleDraftSave(){ clearTimeout(draftSaveTimer); draftSaveTimer = setTimeout(upsertCurrentDraft, 800); }
+  function manualSaveDraft(){
+    clearTimeout(draftSaveTimer);
+    if(!hasFormContent()){ showToast("저장할 내용이 없어요"); return; }
+    upsertCurrentDraft(); resetForm();
+    showToast("임시저장 완료 · 새 평가를 작성할 수 있어요"); render();
+  }
+  function loadDraft(id){
+    const d = state.drafts.find(x=>x.id===id); if(!d) return;
+    state.header = { ...BLANK_HEADER, ...d.header };
+    state.answers = { ...d.answers }; state.lineCheck = d.lineCheck || ""; state.comments = d.comments || "";
+    state.currentDraftId = d.id; state.fieldErrors.clear(); state.itemErrors.clear(); state.lcError = false;
+    state.tab = "form"; render();
+  }
+  function deleteDraft(id){
+    state.drafts = state.drafts.filter(d=>d.id!==id); saveDrafts();
+    if(state.currentDraftId === id) resetForm();
+    showToast("임시저장본을 삭제했어요"); render();
+  }
+  function setAnswer(key, v){
+    state.answers[key] = state.answers[key] === v ? null : v;
+    if(state.answers[key]) state.itemErrors.delete(key);
+    scheduleDraftSave(); render();
+  }
+  function setLineCheck(v){
+    state.lineCheck = state.lineCheck === v ? "" : v;
+    if(state.lineCheck) state.lcError = false;
+    scheduleDraftSave(); render();
+  }
+  function showToast(msg){
+    state.toast = msg; render();
+    setTimeout(()=>{ state.toast = null; render(); }, 2600);
+  }
+  function itemMeta(){ return ITEMS.map(i=>({code:i.code, text:i.text})); }
+
+  function postPayload(p){
+    return fetch(WEBHOOK_URL, { method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body: JSON.stringify({ ...p, itemMeta: itemMeta() }) });
+  }
+
+  function submitForm(){
+    if(state.submitting) return;
+    const h = state.header;
+    const required = [["flightNo","FLT NO"],["sector","구간"],["traineeName","피평가자"],["traineeEmp","피평가자 사번"],["evaluatorName","평가자 이름"],["evaluatorEmp","평가자 사번"]];
+    const missingFields = required.filter(([k])=>!isFieldFilled(k));
+    if(missingFields.length){
+      state.fieldErrors = new Set(missingFields.map(([k])=>k));
+      showToast(`${missingFields.map(([,l])=>l).join(", ")} 을(를) 입력해주세요`);
+      state.tab = "form"; render();
+      document.getElementById(`field-${missingFields[0][0]}`)?.scrollIntoView({behavior:"smooth", block:"center"});
+      return;
+    }
+    state.fieldErrors.clear();
+    const missing = ITEMS.filter(i=>!state.answers[i.key]);
+    if(missing.length){
+      state.itemErrors = new Set(missing.map(i=>i.key));
+      showToast(`${missing.length}개 항목이 비어있어요 (${missing[0].code.split("-")[0]} 항목부터 확인해주세요)`);
+      state.tab = "form"; render();
+      document.getElementById(`item-${missing[0].key}`)?.scrollIntoView({behavior:"smooth", block:"center"});
+      return;
+    }
+    state.itemErrors.clear();
+    if(!state.lineCheck){
+      state.lcError = true;
+      showToast("Line Check 추천 여부를 선택해주세요");
+      state.tab = "form"; render();
+      document.getElementById("lc-card")?.scrollIntoView({behavior:"smooth", block:"center"});
+      return;
+    }
+    const answers = {};
+    ITEMS.forEach(i=>{ answers[i.code] = VAL_LABEL[state.answers[i.key]]; });
+    const payload = {
+      ts: Date.now(), submittedAt: fmtDate(new Date()),
+      date: h.date, flightNo: h.flightNo, sector: h.sector.trim(),
+      traineeName: h.traineeName.trim(), traineeEmp: h.traineeEmp.trim(),
+      evaluatorName: h.evaluatorName.trim(), evaluatorEmp: h.evaluatorEmp.trim(),
+      answers: answers, lineCheck: state.lineCheck, comments: state.comments,
+    };
+    state.submitting = true; render();
+    function finalize(synced){
+      payload.synced = synced;
+      state.history.unshift(payload);
+      pruneOldHistory(); sortHistory(); saveHistory();
+      if(state.currentDraftId){
+        state.drafts = state.drafts.filter(d=>d.id!==state.currentDraftId); saveDrafts();
+      }
+      resetForm();
+      state.tab = "history"; state.submitting = false;
+      showToast(synced ? "제출 완료" : "오프라인 상태예요 · 이 기기에 저장됨, 온라인 되면 재전송 버튼을 눌러주세요");
+    }
+    postPayload(payload).then(()=>finalize(true)).catch(()=>finalize(false));
+  }
+  function retrySubmission(ts){
+    const p = state.history.find(h=>h.ts===ts); if(!p) return;
+    postPayload(p).then(()=>{ p.synced = true; saveHistory(); showToast("재전송 완료"); })
+      .catch(()=>showToast("여전히 오프라인이에요"));
+  }
+
+  function headerField(key, label, placeholder){
+    const err = state.fieldErrors.has(key) ? "field-error" : "";
+    return `<div class="field"><label>${label}</label>
+      <input id="field-${key}" class="${err}" data-key="${key}" value="${escapeHtml(state.header[key]||"")}" placeholder="${placeholder||""}" /></div>`;
+  }
+  function prefixField(key, label, placeholder){
+    const prefix = PREFIX_FIELDS[key]; const err = state.fieldErrors.has(key) ? "field-error" : "";
+    return `<div class="field"><label>${label}</label>
+      <div class="prefix-input ${err}"><span class="prefix-tag">${prefix}</span>
+      <input id="field-${key}" data-key="${key}" data-prefix="${prefix}" inputmode="numeric" pattern="[0-9]*" value="${escapeHtml(getDigits(key))}" placeholder="${placeholder||""}" /></div></div>`;
+  }
+  function dateField(){
+    const err = state.fieldErrors.has("date") ? "field-error" : "";
+    const display = state.header.date ? fmtDisplayDate(state.header.date) : "";
+    return `<div class="field"><label>일자</label>
+      <button type="button" id="date-toggle" class="date-btn ${err}">${display || "날짜 선택"}</button>${renderDatePicker()}</div>`;
+  }
+  function renderDatePicker(){
+    if(!state.datePickerOpen) return "";
+    const minD = new Date(dateOffsetStr(-4)+"T00:00:00"), maxD = new Date(dateOffsetStr(4)+"T00:00:00");
+    const cal = state.calendarMonth, year = cal.getFullYear(), month = cal.getMonth();
+    const first = new Date(year, month, 1).getDay(), days = new Date(year, month+1, 0).getDate();
+    const todayD = todayStr();
+    let cells = "";
+    for(let i=0;i<first;i++) cells += `<div class="cal-cell empty"></div>`;
+    for(let day=1; day<=days; day++){
+      const d = new Date(year, month, day), s = toDateStr(d);
+      if(d >= minD && d <= maxD){
+        cells += `<button type="button" class="cal-cell ${state.header.date===s?'selected':''} ${s===todayD?'today':''}" data-date="${s}">${day}</button>`;
+      } else cells += `<div class="cal-cell disabled">${day}</div>`;
+    }
+    return `<div class="cal-popup">
+      <div class="cal-header"><button type="button" class="cal-nav" data-nav="-1">‹</button>
+      <div class="cal-title">${year}년 ${month+1}월</div><button type="button" class="cal-nav" data-nav="1">›</button></div>
+      <div class="cal-weekdays">${["일","월","화","수","목","금","토"].map(w=>`<div>${w}</div>`).join("")}</div>
+      <div class="cal-grid">${cells}</div>
+      <div class="cal-footer">선택 가능 범위: ${fmtDisplayDate(dateOffsetStr(-4))} ~ ${fmtDisplayDate(dateOffsetStr(4))}</div></div>`;
+  }
+
+  function itemHtml(item){
+    const val = state.answers[item.key] || null;
+    const err = state.itemErrors.has(item.key) ? "item-error" : "";
+    return `<div class="item ${val?'rated':''} ${err}" id="item-${item.key}">
+      <div class="item-head"><div class="item-no">${item.code.split("-")[1]})</div>
+      <div class="item-text">${escapeHtml(item.text)}</div></div>
+      <div class="yn-row">${["Y","N","NA"].map(v=>`<button class="yn-btn ${val===v?'on':''}" data-v="${v}" data-item="${item.key}">${VAL_LABEL[v]}</button>`).join("")}</div></div>`;
+  }
+
+  function renderForm(){
+    let html = "";
+    if(state.currentDraftId){
+      html += `<div class="section"><div class="draft-banner"><div class="draft-text"><b>임시저장함에 있는 평가를 수정 중이에요</b><br/>제출하면 임시저장함에서 자동으로 사라져요</div></div></div>`;
+    }
+    html += `<div class="section"><div class="card"><h2>평가 정보</h2>
+      <div class="field-grid">${dateField()}${prefixField("flightNo","FLT NO *","예: 201")}</div>
+      ${headerField("sector","구간 *","예: ICN/KIX")}
+      <div class="field-grid">${headerField("traineeName","피평가자 *","이름")}${headerField("traineeEmp","피평가자 사번 *","사번")}</div>
+      <div class="field-grid">${headerField("evaluatorName","평가자 이름 *","이름")}${headerField("evaluatorEmp","평가자 사번 *","사번")}</div>
+      </div></div>`;
+    SECTIONS.forEach(sec=>{
+      html += `<div class="section" style="padding-top:0"><div class="group-title">${escapeHtml(sec.t)}</div>`;
+      sec.subs.forEach(sub=>{
+        html += `<div class="sub-title">${escapeHtml(sub.t)}</div>`;
+        let lastChip = "";
+        sub.list.forEach(it=>{
+          if(it.chip && it.chip !== lastChip) html += `<div class="sub-label">${escapeHtml(it.chip)}</div>`;
+          lastChip = it.chip;
+          html += itemHtml(it);
+        });
+      });
+      html += `</div>`;
+    });
+    html += `<div class="section"><div class="card"><h2>Overall Comment</h2>
+      <div class="lc-row ${state.lcError?'lc-error':''}" id="lc-card" style="margin-bottom:10px;">${["Recommended","Not Recommended"].map(v=>`<button class="lc-btn ${state.lineCheck===v?'on':''}" data-lc="${v}" data-v="${v}">${v==="Recommended"?"Recommended For Line Check":"Not Recommended For Line Check"}</button>`).join("")}</div>
+      <textarea id="comments" rows="8" placeholder="종합 의견을 입력하세요">${escapeHtml(state.comments)}</textarea></div></div>`;
+    return html;
+  }
+  function renderHistory(){
+    if(!state.history.length) return `<div class="section"><div class="empty">아직 제출된 평가가 없어요.<br/>평가 탭에서 체크리스트를 작성해 제출해보세요.</div></div>`;
+    return `<div class="section">` + state.history.map(h=>`
+      <div class="history-item"><div class="row1"><span>${escapeHtml(h.traineeName||"피평가자 없음")} · ${escapeHtml(h.lineCheck==="Recommended"?"Recommended":"Not Recommended")}</span>
+      <span class="badge ${h.synced?'synced':'pending'}">${h.synced?'제출 완료':'전송 대기중'}</span></div>
+      <div class="row2">${escapeHtml(h.submittedAt||"")} · ${escapeHtml(h.evaluatorName||"평가자 미입력")} · ${escapeHtml(h.flightNo||"")} · ${escapeHtml(h.sector||"")}</div>
+      ${!h.synced?`<button class="retry-btn" data-ts="${h.ts}" style="margin-top:8px; width:100%;">↻ 다시 전송</button>`:""}</div>`).join("") + `</div>`;
+  }
+  function renderDrafts(){
+    if(!state.drafts.length) return `<div class="section"><div class="empty">임시저장된 평가가 없어요.<br/>평가 작성 중 "임시저장" 버튼을 누르면 여기 쌓여요.<br/>(입력 중인 내용은 자동으로도 저장돼요)</div></div>`;
+    return `<div class="section">` + state.drafts.map(d=>{
+      const n = Object.keys(d.answers||{}).filter(k=>d.answers[k]).length;
+      return `<div class="history-item"><div class="row1"><span>${escapeHtml((d.header&&d.header.traineeName)||"피평가자 미입력")} · ${n}/${ITEMS.length} 항목</span></div>
+      <div class="row2">${d.savedAt?fmtDate(new Date(d.savedAt)):""} 저장됨 · ${escapeHtml((d.header&&d.header.flightNo)||"편명 미입력")}</div>
+      <div style="display:flex; gap:6px; margin-top:8px;"><button class="copy-row-btn" data-load="${d.id}">이어서 작성</button>
+      <button class="retry-btn" data-del="${d.id}" style="margin-top:0; color:var(--bad);">삭제</button></div></div>`;
+    }).join("") + `</div>`;
+  }
+
+  function render(){
+    const root = document.getElementById("app-root");
+    const done = answeredCount(), total = ITEMS.length, pct = Math.round(done/total*100);
+    root.innerHTML = `
+      <div class="topbar"><div class="eyebrow">Parata Air · Cabin Crew</div><h1>DUTY PURSER OJT CHECK LIST</h1>
+      <div class="progress-row"><div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="progress-label">${done}/${total} 항목</div></div></div>
+      <div class="tabs">
+        <button class="tab ${state.tab==='form'?'active':''}" data-tab="form">평가 작성</button>
+        <button class="tab ${state.tab==='drafts'?'active':''}" data-tab="drafts">임시저장 (${state.drafts.length})</button>
+        <button class="tab ${state.tab==='history'?'active':''}" data-tab="history">제출 내역 (${state.history.length})</button></div>
+      ${state.tab==='form' ? renderForm() : (state.tab==='drafts' ? renderDrafts() : renderHistory())}
+      ${state.tab==='form' ? `<div class="bottombar"><button class="draft-save-btn" id="draft-save-btn">임시저장</button>
+        <button class="submit-btn" id="submit-btn" ${state.submitting?'disabled':''}>${state.submitting?"전송 중...":(done<total?`제출 (${total-done}개 남음)`:"제출하기")}</button></div>` : ``}
+      ${state.toast ? `<div class="toast">${escapeHtml(state.toast)}</div>` : ``}`;
+
+    root.querySelectorAll(".yn-btn").forEach(b=>b.addEventListener("click",()=>setAnswer(b.dataset.item,b.dataset.v)));
+    root.querySelectorAll(".lc-btn").forEach(b=>b.addEventListener("click",()=>setLineCheck(b.dataset.lc)));
+    root.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{
+      state.tab = b.dataset.tab;
+      if(state.tab==="history"){ pruneOldHistory(); sortHistory(); }
+      render();
+    }));
+    const dt = document.getElementById("date-toggle");
+    if(dt) dt.addEventListener("click",()=>{
+      state.datePickerOpen = !state.datePickerOpen;
+      if(state.datePickerOpen) state.calendarMonth = new Date((state.header.date||todayStr())+"T00:00:00");
+      render();
+    });
+    root.querySelectorAll(".cal-nav").forEach(b=>b.addEventListener("click",()=>{
+      const c = new Date(state.calendarMonth); c.setDate(1); c.setMonth(c.getMonth()+parseInt(b.dataset.nav,10));
+      state.calendarMonth = c; render();
+    }));
+    root.querySelectorAll(".cal-cell[data-date]").forEach(b=>b.addEventListener("click",()=>{
+      state.header.date = b.dataset.date; state.datePickerOpen = false; state.fieldErrors.delete("date");
+      scheduleDraftSave(); render();
+    }));
+    root.querySelectorAll("[data-key]").forEach(inp=>{
+      const apply = ()=>{
+        const key = inp.dataset.key, prefix = inp.dataset.prefix;
+        if(prefix){
+          const digits = inp.value.replace(/\D/g,"");
+          state.header[key] = digits ? prefix+digits : "";
+          if(inp.value !== digits) inp.value = digits;
+        } else state.header[key] = inp.value;
+        if(state.fieldErrors.has(key) && isFieldFilled(key)){
+          state.fieldErrors.delete(key); inp.classList.remove("field-error");
+          const w = inp.closest(".prefix-input"); if(w) w.classList.remove("field-error");
+        }
+        scheduleDraftSave();
+      };
+      inp.addEventListener("input", apply); inp.addEventListener("change", apply);
+    });
+    const cm = document.getElementById("comments");
+    if(cm) cm.addEventListener("input",()=>{ state.comments = cm.value; scheduleDraftSave(); });
+    const sb = document.getElementById("submit-btn"); if(sb) sb.addEventListener("click", submitForm);
+    const dsb = document.getElementById("draft-save-btn"); if(dsb) dsb.addEventListener("click", manualSaveDraft);
+    root.querySelectorAll("[data-load]").forEach(b=>b.addEventListener("click",()=>loadDraft(b.dataset.load)));
+    root.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>deleteDraft(b.dataset.del)));
+    root.querySelectorAll("[data-ts]").forEach(b=>b.addEventListener("click",()=>retrySubmission(parseFloat(b.dataset.ts))));
+  }
+
+  loadLocal(); render();
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+  }
+})();
+</script>
+</body>
+</html>
